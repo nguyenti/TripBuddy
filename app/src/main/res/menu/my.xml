@@ -1,8 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MyActivity" >
-    <item android:id="@+id/action_settings"
-        android:title="@string/action_settings"
+    <item android:id="@+id/action_add"
+        android:title="@string/menu_add_marker"
         android:orderInCategory="100"
         android:showAsAction="never" />
+    <item android:id="@+id/action_enter_address"
+        android:title="@string/menu_directions"
+        android:orderInCategory="10"
+        android:showAsAction="ifRoom" />
 </menu>

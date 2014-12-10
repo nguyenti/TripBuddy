@@ -4,5 +4,10 @@
     <string name="app_name">TripBuddy</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="menu_directions">Directions</string>
+    <string name="menu_add_marker">Add marker</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="go">Go</string>
 
 </resources>
