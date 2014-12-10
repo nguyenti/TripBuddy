@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import hu.ait.tiffanynguyen.tripbuddy.data.Directions;
+import hu.ait.tiffanynguyen.tripbuddy.map.GeoCodeRequest;
 import hu.ait.tiffanynguyen.tripbuddy.map.HttpConnection;
 import hu.ait.tiffanynguyen.tripbuddy.map.PathJSONParser;
 
@@ -38,8 +40,6 @@ import hu.ait.tiffanynguyen.tripbuddy.map.PathJSONParser;
  */
 
 public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListener {
-
-    private GoogleMap map;
 
     private static final LatLng LOWER_MANHATTAN = new LatLng(40.722543,
             -73.998585);
@@ -50,6 +50,9 @@ public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListe
 
     private static int REQUEST_DIRECTIONS = 100;
 
+
+    private GoogleMap map;
+    private Directions currDir;
 
     final String TAG = "PathGoogleMapActivity";
 
@@ -69,8 +72,7 @@ public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListe
         ReadTask downloadTask = new ReadTask();
         downloadTask.execute(url);
 
-//        GeoCodeRequest geoCodeRequest = new GeoCodeRequest();
-//        geoCodeRequest.execute();
+        currDir = new Directions(PIPA_UTCA, AIT);
 
         // You can change the CameraPosition to view the map differently
         // This will have a 3d movement Zooming into the position (animate Camera)
@@ -241,20 +243,8 @@ public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListe
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_add) {
-            MarkerOptions marker = new MarkerOptions();
-
-            // if you want to use persistence data, you can save the coordinates! LatLong
-            marker.position(map.getCameraPosition().target);
-            marker.title("My new marker");
-            marker.snippet("My marker info text");
-
-            marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher));
-            marker.draggable(true);
-
-
-            map.addMarker(marker);
-
+        if (id == R.id.action_save) {
+            currDir.save();
             return true;
         } else if (id == R.id.action_enter_address) {
             Intent i = new Intent();
@@ -273,13 +263,29 @@ public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListe
             Bundle bundle = intent.getBundleExtra(GeoCodeRequest.KEY_ADDRESS);
             LatLng[] latLng = (LatLng[]) bundle.getSerializable(GeoCodeRequest.KEY_BUNDLE);
 
-            addNewMarkers(latLng);
-
-            ReadTask downloadTask = new ReadTask();
-            String url = getMapsApiDirectionsUrl(latLng[0], latLng[1]);
-            downloadTask.execute(url);
+            updateMap(latLng);
         }
     };
+
+    private void updateMap(LatLng[] latLng) {
+
+        addNewMarkers(latLng);
+
+        currDir.setStart(latLng[0]);
+        currDir.setEnd(latLng[1]);
+
+        ReadTask downloadTask = new ReadTask();
+        String url = getMapsApiDirectionsUrl(latLng[0], latLng[1]);
+        downloadTask.execute(url);
+
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(currDir.getMidpoint())
+                .zoom(13)
+//                .bearing(90) // sets how the map is viewed
+                .tilt(30)
+                .build();
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

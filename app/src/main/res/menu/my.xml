@@ -1,12 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MyActivity" >
-    <item android:id="@+id/action_add"
-        android:title="@string/menu_add_marker"
-        android:orderInCategory="100"
-        android:showAsAction="never" />
     <item android:id="@+id/action_enter_address"
         android:title="@string/menu_directions"
         android:orderInCategory="10"
         android:showAsAction="ifRoom" />
+    <item android:id="@+id/action_save"
+        android:title="@string/label_save"
+        android:icon="@drawable/ic_action_save"
+        android:orderInCategory="10"
+        android:showAsAction="ifRoom" />
+    <item android:id="@+id/action_view"
+        android:title="View saved directions"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
 </menu>

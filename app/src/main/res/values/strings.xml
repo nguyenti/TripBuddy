@@ -9,5 +9,6 @@
     <string name="from">From</string>
     <string name="to">To</string>
     <string name="go">Go</string>
+    <string name="label_save">Save current directions</string>
 
 </resources>

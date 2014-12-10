@@ -1,4 +1,4 @@
-package hu.ait.tiffanynguyen.tripbuddy;
+package hu.ait.tiffanynguyen.tripbuddy.map;
 
 /**
  * Created by tiffanynguyen on 12/8/14.
