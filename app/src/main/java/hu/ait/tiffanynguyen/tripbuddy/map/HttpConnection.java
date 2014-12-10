@@ -18,6 +18,7 @@ public class HttpConnection {
         InputStream iStream = null;
         HttpURLConnection urlConnection = null;
         try {
+            Log.i("LOG_URL", mapsApiDirectionsUrl);
             URL url = new URL(mapsApiDirectionsUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.connect();

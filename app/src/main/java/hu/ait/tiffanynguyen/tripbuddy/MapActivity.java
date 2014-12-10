@@ -1,15 +1,14 @@
 package hu.ait.tiffanynguyen.tripbuddy;
 
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +17,6 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -39,7 +37,7 @@ import hu.ait.tiffanynguyen.tripbuddy.map.PathJSONParser;
  * Directions code taken from http://javapapers.com/android/draw-path-on-google-maps-android-api/
  */
 
-public class MyActivity extends Activity implements GoogleMap.OnMarkerDragListener {
+public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListener {
 
     private GoogleMap map;
 
@@ -58,7 +56,7 @@ public class MyActivity extends Activity implements GoogleMap.OnMarkerDragListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my);
+        setContentView(R.layout.activity_map);
 
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
@@ -70,6 +68,9 @@ public class MyActivity extends Activity implements GoogleMap.OnMarkerDragListen
         String url = getMapsApiDirectionsUrl();
         ReadTask downloadTask = new ReadTask();
         downloadTask.execute(url);
+
+//        GeoCodeRequest geoCodeRequest = new GeoCodeRequest();
+//        geoCodeRequest.execute();
 
         // You can change the CameraPosition to view the map differently
         // This will have a 3d movement Zooming into the position (animate Camera)
@@ -87,10 +88,20 @@ public class MyActivity extends Activity implements GoogleMap.OnMarkerDragListen
         String waypoints = "waypoints=optimize:true|"
                 + PIPA_UTCA.latitude + "," + PIPA_UTCA.longitude
                 + "||" + AIT.latitude + "," + AIT.longitude;
-//                + LOWER_MANHATTAN.latitude + "," + LOWER_MANHATTAN.longitude
-//                + "|" + "|" + BROOKLYN_BRIDGE.latitude + ","
-//                + BROOKLYN_BRIDGE.longitude + "|" + WALL_STREET.latitude + ","
-//                + WALL_STREET.longitude;
+
+        String sensor = "sensor=false";
+        String params = waypoints + "&" + sensor;
+        String output = "json";
+        String url = "https://maps.googleapis.com/maps/api/directions/"
+                + output + "?" + params;
+        Log.i("LOG_URL", url);
+        return url;
+    }
+
+    private String getMapsApiDirectionsUrl(LatLng start, LatLng end) {
+        String waypoints = "waypoints=optimize:true|"
+                + start.latitude + "," + start.longitude
+                + "||" + end.latitude + "," + end.longitude;
 
         String sensor = "sensor=false";
         String params = waypoints + "&" + sensor;
@@ -100,18 +111,33 @@ public class MyActivity extends Activity implements GoogleMap.OnMarkerDragListen
         return url;
     }
 
+    private String getMapsApiDirectionsUrl(String start, String end) {
+        String waypoints = "waypoints=optimize:true|"
+                + start + "||" + end;
+
+        String key = "key=AIzaSyAMPjOwwYqTflMR1HMmD7WwyJ8HWEj4G2Y";
+        String sensor = "sensor=false";
+        String params = waypoints + "&" + sensor;
+        String output = "json";
+        String url = "https://maps.googleapis.com/maps/api/directions/"
+                + output + "?" + params + "&" + key;
+        return url;
+    }
+
     private void addMarkers() {
         if (map != null) {
-//            map.addMarker(new MarkerOptions().position(BROOKLYN_BRIDGE)
-//                    .title("First Point"));
-//            map.addMarker(new MarkerOptions().position(LOWER_MANHATTAN)
-//                    .title("Second Point"));
-//            map.addMarker(new MarkerOptions().position(WALL_STREET)
-//                    .title("Third Point"));
             map.addMarker(new MarkerOptions().position(PIPA_UTCA)
                     .title("Pipa Point"));
             map.addMarker(new MarkerOptions().position(AIT)
                     .title("AIT Point"));
+        }
+    }
+
+    private void addNewMarkers(LatLng[] latLng) {
+        map.clear();
+        for (int i = 0; i < latLng.length; i++) {
+            map.addMarker(new MarkerOptions().position(latLng[i]).title("Item " + i));
+            Log.i("LOG_MARKER", "Added marker at " + latLng[i].toString());
         }
     }
 
@@ -174,6 +200,7 @@ public class MyActivity extends Activity implements GoogleMap.OnMarkerDragListen
         protected void onPostExecute(List<List<HashMap<String, String>>> routes) {
             ArrayList<LatLng> points = null;
             PolylineOptions polyLineOptions = null;
+            Log.i("LOG_ROUTESIZE", routes.size()+"");
 
             // traversing through routes
             for (int i = 0; i < routes.size(); i++) {
@@ -230,34 +257,58 @@ public class MyActivity extends Activity implements GoogleMap.OnMarkerDragListen
 
             return true;
         } else if (id == R.id.action_enter_address) {
-            Log.i("LOG_FRAGMENT", "Fragment launcher");
-//            addressFragment = new AddressFragment();
-//            getFragmentManager().beginTransaction()
-//                    .add(addressFragment, AddressFragment.TAG_ADDRESS_FRAGMENT)
-//                    .commit();
-
-//            FragmentManager fm = getFragmentManager();
-//            FragmentTransaction ft = fm.beginTransaction();
-//            ft.add(R.id.layoutContainer, new AddressActivity());
-//            ft.addToBackStack(null);
-//            ft.commit();
             Intent i = new Intent();
             i.setClass(this, AddressActivity.class);
             // REQUEST... is a request code to get results from a certain activity
             startActivityForResult(i, REQUEST_DIRECTIONS);
-
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Bundle bundle = intent.getBundleExtra(GeoCodeRequest.KEY_ADDRESS);
+            LatLng[] latLng = (LatLng[]) bundle.getSerializable(GeoCodeRequest.KEY_BUNDLE);
+
+            addNewMarkers(latLng);
+
+            ReadTask downloadTask = new ReadTask();
+            String url = getMapsApiDirectionsUrl(latLng[0], latLng[1]);
+            downloadTask.execute(url);
+        }
+    };
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            Toast.makeText(this, "Password changed", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Directions sent", Toast.LENGTH_LONG).show();
+            Bundle bundle = data.getBundleExtra(AddressActivity.LOCATION_BUNDLE);
+            String start = bundle.getString(AddressActivity.START_LOCATION);
+            String end = bundle.getString(AddressActivity.END_LOCATION);
+
+            GeoCodeRequest geoCodeRequest = new GeoCodeRequest(this);
+            geoCodeRequest.execute(start, end);
+
         } else if (resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
         }
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                locationReceiver, new IntentFilter(GeoCodeRequest.FILTER_ADDRESS)
+        );
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(locationReceiver);
     }
 }

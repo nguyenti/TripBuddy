@@ -4,6 +4,8 @@ package hu.ait.tiffanynguyen.tripbuddy.map;
  * Created by tiffanynguyen on 12/8/14.
  */
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -23,6 +25,7 @@ public class PathJSONParser {
         JSONArray jSteps = null;
         try {
             jRoutes = jObject.getJSONArray("routes");
+            Log.i("LOG_JSON", jObject.toString());
             /** Traversing all routes */
             for (int i = 0; i < jRoutes.length(); i++) {
                 jLegs = ((JSONObject) jRoutes.get(i)).getJSONArray("legs");

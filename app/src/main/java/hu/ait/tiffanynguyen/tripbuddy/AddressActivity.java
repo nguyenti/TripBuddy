@@ -33,6 +33,10 @@ public class AddressActivity extends Activity implements AdapterView.OnItemClick
     private AutoCompleteTextView actvFrom;
     private AutoCompleteTextView actvTo;
 
+    public static final String START_LOCATION = "START_LOCATION";
+    public static final String END_LOCATION = "END_LOCATION";
+    public static final String LOCATION_BUNDLE = "LOCATION_BUNDLE";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +69,10 @@ public class AddressActivity extends Activity implements AdapterView.OnItemClick
             @Override
             public void onClick(View v) {
                 Intent intentResult = new Intent();
+                Bundle arguments = new Bundle();
+                arguments.putString(START_LOCATION, actvFrom.getText().toString().trim().replaceAll("\\s+","+"));
+                arguments.putString(END_LOCATION, actvTo.getText().toString().trim().replaceAll("\\s+","+"));
+                intentResult.putExtra(LOCATION_BUNDLE, arguments);
                 setResult(RESULT_OK, intentResult);
                 finish();
             }
