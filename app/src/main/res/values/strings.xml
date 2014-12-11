@@ -10,5 +10,6 @@
     <string name="to">To</string>
     <string name="go">Go</string>
     <string name="label_save">Save current directions</string>
+    <string name="title_activity_directions_list">DirectionsList</string>
 
 </resources>

@@ -25,7 +25,7 @@ public class PathJSONParser {
         JSONArray jSteps = null;
         try {
             jRoutes = jObject.getJSONArray("routes");
-            Log.i("LOG_JSON", jObject.toString());
+//            Log.i("LOG_JSON", jObject.toString());
             /** Traversing all routes */
             for (int i = 0; i < jRoutes.length(); i++) {
                 jLegs = ((JSONObject) jRoutes.get(i)).getJSONArray("legs");

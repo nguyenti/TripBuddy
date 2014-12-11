@@ -3,15 +3,17 @@
     tools:context=".MyActivity" >
     <item android:id="@+id/action_enter_address"
         android:title="@string/menu_directions"
+        android:icon="@drawable/ic_action_search"
         android:orderInCategory="10"
         android:showAsAction="ifRoom" />
     <item android:id="@+id/action_save"
         android:title="@string/label_save"
         android:icon="@drawable/ic_action_save"
-        android:orderInCategory="10"
+        android:orderInCategory="50"
         android:showAsAction="ifRoom" />
-    <item android:id="@+id/action_view"
-        android:title="View saved directions"
+    <item android:id="@+id/action_view_routes"
+        android:title="Saved"
+        android:icon="@drawable/ic_action_collection"
         android:orderInCategory="100"
-        android:showAsAction="never" />
+        android:showAsAction="ifRoom" />
 </menu>

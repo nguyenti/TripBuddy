@@ -17,10 +17,8 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -30,31 +28,29 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import hu.ait.tiffanynguyen.tripbuddy.data.Directions;
+import hu.ait.tiffanynguyen.tripbuddy.data.Route;
 import hu.ait.tiffanynguyen.tripbuddy.map.GeoCodeRequest;
 import hu.ait.tiffanynguyen.tripbuddy.map.HttpConnection;
+//import hu.ait.tiffanynguyen.tripbuddy.map.ParserTask;
 import hu.ait.tiffanynguyen.tripbuddy.map.PathJSONParser;
+import hu.ait.tiffanynguyen.tripbuddy.map.ReverseGeoCodeRequest;
+//import hu.ait.tiffanynguyen.tripbuddy.map.ReadTask;
 
 /**
  * Directions code taken from http://javapapers.com/android/draw-path-on-google-maps-android-api/
  */
 
-public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListener {
+public class MapActivity extends Activity {
 
-    private static final LatLng LOWER_MANHATTAN = new LatLng(40.722543,
-            -73.998585);
-    private static final LatLng BROOKLYN_BRIDGE = new LatLng(40.7057, -73.9964);
-    private static final LatLng WALL_STREET = new LatLng(40.7064, -74.0094);
     private static final LatLng PIPA_UTCA = new LatLng(47.487512, 19.059062);
     private static final LatLng AIT = new LatLng(47.561333, 19.054627);
 
-    private static int REQUEST_DIRECTIONS = 100;
+    private static final int REQUEST_ROUTE = 100;
+    private static final int REQUEST_SAVED_ROUTE = 110;
 
 
     private GoogleMap map;
-    private Directions currDir;
-
-    final String TAG = "PathGoogleMapActivity";
+    private Route currDir;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,24 +62,39 @@ public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListe
 //        map.setTrafficEnabled(true);
 
         // if you want to know where the marker was moved to, you need OnMarkerDragListener
-        map.setOnMarkerDragListener(this);
+//        map.setOnMarkerDragListener(this);
+//        implements GoogleMap.OnMarkerDragListener
 
         String url = getMapsApiDirectionsUrl();
-        ReadTask downloadTask = new ReadTask();
+        ReadTask downloadTask = new ReadTask(this);
         downloadTask.execute(url);
 
-        currDir = new Directions(PIPA_UTCA, AIT);
+        currDir = new Route(PIPA_UTCA, AIT);
 
         // You can change the CameraPosition to view the map differently
         // This will have a 3d movement Zooming into the position (animate Camera)
         CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(PIPA_UTCA)
-                .zoom(13)
+                .target(currDir.getMidpoint())
+                .zoom(12)
 //                .bearing(90) // sets how the map is viewed
                 .tilt(30)
                 .build();
         map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         addMarkers();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                locationReceiver, new IntentFilter(GeoCodeRequest.FILTER_ADDRESS)
+        );
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(locationReceiver);
     }
 
     private String getMapsApiDirectionsUrl() {
@@ -108,22 +119,8 @@ public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListe
         String sensor = "sensor=false";
         String params = waypoints + "&" + sensor;
         String output = "json";
-        String url = "https://maps.googleapis.com/maps/api/directions/"
+        return "https://maps.googleapis.com/maps/api/directions/"
                 + output + "?" + params;
-        return url;
-    }
-
-    private String getMapsApiDirectionsUrl(String start, String end) {
-        String waypoints = "waypoints=optimize:true|"
-                + start + "||" + end;
-
-        String key = "key=AIzaSyAMPjOwwYqTflMR1HMmD7WwyJ8HWEj4G2Y";
-        String sensor = "sensor=false";
-        String params = waypoints + "&" + sensor;
-        String output = "json";
-        String url = "https://maps.googleapis.com/maps/api/directions/"
-                + output + "?" + params + "&" + key;
-        return url;
     }
 
     private void addMarkers() {
@@ -141,24 +138,18 @@ public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListe
             map.addMarker(new MarkerOptions().position(latLng[i]).title("Item " + i));
             Log.i("LOG_MARKER", "Added marker at " + latLng[i].toString());
         }
-    }
+   }
 
-    @Override
-    public void onMarkerDragStart(Marker marker) {
+    public class ReadTask extends AsyncTask<String, Void, String> {
 
-    }
+        public static final String FILTER_JSON = "FILTER_JSON";
+        public static final String KEY_JSON = "KEY_JSON";
+        private Context context;
 
-    @Override
-    public void onMarkerDrag(Marker marker) {
+        ReadTask(Context context) {
+            this.context = context;
+        }
 
-    }
-
-    @Override
-    public void onMarkerDragEnd(Marker marker) {
-
-    }
-
-    private class ReadTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... url) {
             String data = "";
@@ -174,12 +165,22 @@ public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListe
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            new ParserTask().execute(result);
+            Log.i("LOG_SENDING", "Sending json..");
+            Intent i = new Intent(FILTER_JSON);
+            i.putExtra(KEY_JSON, result);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+            new ParserTask(context).execute(result);
         }
     }
 
-    private class ParserTask extends
+    public class ParserTask extends
             AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        private Context context;
+
+        public ParserTask(Context context) {
+            this.context = context;
+        }
 
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(
@@ -202,7 +203,7 @@ public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListe
         protected void onPostExecute(List<List<HashMap<String, String>>> routes) {
             ArrayList<LatLng> points = null;
             PolylineOptions polyLineOptions = null;
-            Log.i("LOG_ROUTESIZE", routes.size()+"");
+            Log.i("LOG_ROUTESIZE", routes.size() + "");
 
             // traversing through routes
             for (int i = 0; i < routes.size(); i++) {
@@ -244,47 +245,29 @@ public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListe
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_save) {
-            currDir.save();
+            Log.i("LOG_SAVE", "Saved!");
+            try {
+                currDir.save();
+            } catch (Exception e) {
+                Log.e("LOG_SAVE_FAILED", "Save failed");
+                Toast.makeText(this, "Sorry, there was an issue saving. Please try again later",
+                        Toast.LENGTH_SHORT).show();
+//                e.printStackTrace();
+            }
             return true;
         } else if (id == R.id.action_enter_address) {
             Intent i = new Intent();
             i.setClass(this, AddressActivity.class);
             // REQUEST... is a request code to get results from a certain activity
-            startActivityForResult(i, REQUEST_DIRECTIONS);
+            startActivityForResult(i, REQUEST_ROUTE);
             return true;
+        } else if (id == R.id.action_view_routes) {
+            Intent i = new Intent();
+            i.setClass(this, RouteListActivity.class);
+            startActivityForResult(i, REQUEST_SAVED_ROUTE);
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Bundle bundle = intent.getBundleExtra(GeoCodeRequest.KEY_ADDRESS);
-            LatLng[] latLng = (LatLng[]) bundle.getSerializable(GeoCodeRequest.KEY_BUNDLE);
-
-            updateMap(latLng);
-        }
-    };
-
-    private void updateMap(LatLng[] latLng) {
-
-        addNewMarkers(latLng);
-
-        currDir.setStart(latLng[0]);
-        currDir.setEnd(latLng[1]);
-
-        ReadTask downloadTask = new ReadTask();
-        String url = getMapsApiDirectionsUrl(latLng[0], latLng[1]);
-        downloadTask.execute(url);
-
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(currDir.getMidpoint())
-                .zoom(13)
-//                .bearing(90) // sets how the map is viewed
-                .tilt(30)
-                .build();
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 
     @Override
@@ -303,18 +286,59 @@ public class MapActivity extends Activity implements GoogleMap.OnMarkerDragListe
         }
     }
 
+    private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.i("LOG_RECEIVED", "got something");
+            if (intent.hasExtra(GeoCodeRequest.KEY_ADDRESS)) {
+                Log.i("LOG_RECEIVED", "got address");
+                Bundle bundle = intent.getBundleExtra(GeoCodeRequest.KEY_ADDRESS);
+                LatLng[] latLng = (LatLng[]) bundle.getParcelableArray(GeoCodeRequest.KEY_BUNDLE);
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-                locationReceiver, new IntentFilter(GeoCodeRequest.FILTER_ADDRESS)
-        );
-    }
+                updateMap(latLng);
+            }
+            if (intent.hasExtra(ReadTask.KEY_JSON)) {
+                Log.i("LOG_RECEIVED", "got json");
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(locationReceiver);
-    }
+                String json = intent.getStringExtra(ReadTask.KEY_JSON);
+                currDir.setJson(json);
+            }
+            if (intent.hasExtra(ReverseGeoCodeRequest.KEY_STR_ADDRESS)) {
+                Log.i("LOG_RECEIVED", "got street addr");
+
+                String results[] = intent.getStringArrayExtra(ReverseGeoCodeRequest.KEY_STR_ADDRESS);
+                currDir.setStrStart(results[0]);
+                currDir.setStrEnd(results[1]);
+            }
+//            if (intent.hasExtra(ParserTask.KEY_POLYLINE)) {
+//                Log.i("LOG_RECEIVED", "got polyline");
+//                Bundle bundle = intent.getBundleExtra(ParserTask.KEY_POLYLINE);
+//                PolylineOptions polyLineOptions = bundle.getParcelable(ParserTask.KEY_POLY_BUNDLE);
+//                map.addPolyline(polyLineOptions);
+//            }
+        }
+    };
+
+    private void updateMap(LatLng[] latLng) {
+
+        addNewMarkers(latLng);
+
+        currDir.setStart(latLng[0]);
+        currDir.setEnd(latLng[1]);
+
+        ReverseGeoCodeRequest gReq = new ReverseGeoCodeRequest(this);
+        gReq.execute(currDir.getStart(), currDir.getEnd());
+
+        ReadTask downloadTask = new ReadTask(this);
+        String url = getMapsApiDirectionsUrl(latLng[0], latLng[1]);
+        downloadTask.execute(url);
+
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(currDir.getMidpoint())
+                .zoom(13)
+//                .bearing(90) // sets how the map is viewed
+                .tilt(30)
+                .build();
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+     }
 }

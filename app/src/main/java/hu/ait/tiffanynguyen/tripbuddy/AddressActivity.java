@@ -97,7 +97,7 @@ public class AddressActivity extends Activity implements AdapterView.OnItemClick
     public void onResume() {
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(
-                locationReceiver, new IntentFilter(AutoComplete.FILTER_LOCATIONS)
+                locationReceiver, new IntentFilter(PlacesAutoCompleteAdapter.AutoComplete.FILTER_LOCATIONS)
         );
     }
 
@@ -110,7 +110,7 @@ public class AddressActivity extends Activity implements AdapterView.OnItemClick
     private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ArrayList<String> rawJson = intent.getStringArrayListExtra(AutoComplete.KEY_LOCATION);
+            ArrayList<String> rawJson = intent.getStringArrayListExtra(PlacesAutoCompleteAdapter.AutoComplete.KEY_LOCATION);
 
             try {
 //                JSONObject root = new JSONObject(rawJson);
