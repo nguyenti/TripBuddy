@@ -10,17 +10,21 @@ import java.io.Serializable;
  */
 public class Route extends SugarRecord<Route> implements Serializable {
 
-    LatLng start;
+    double startLat;
+    double startLng;
     String strStart;
-    LatLng end;
+    double endLat;
+    double endLng;
     String strEnd;
     String json;
 
-    Route() {}
+    public Route() {}
 
     public Route(LatLng start, LatLng end) {
-        this.start = start;
-        this.end = end;
+        this.startLat = start.latitude;
+        this.startLng = start.longitude;
+        this.endLat = end.latitude;
+        this.endLng = end.longitude;
     }
 
     public String getStrStart() {
@@ -39,20 +43,54 @@ public class Route extends SugarRecord<Route> implements Serializable {
         this.strEnd = strEnd;
     }
 
-    public LatLng getStart() {
-        return start;
+    public double getStartLat() {
+        return startLat;
+    }
+
+    public void setStartLat(double startLat) {
+        this.startLat = startLat;
+    }
+
+    public double getStartLng() {
+        return startLng;
+    }
+
+    public void setStartLng(double startLng) {
+        this.startLng = startLng;
+    }
+
+    public double getEndLat() {
+        return endLat;
+    }
+
+    public void setEndLat(double endLat) {
+        this.endLat = endLat;
+    }
+
+    public double getEndLng() {
+        return endLng;
     }
 
     public void setStart(LatLng start) {
-        this.start = start;
+        this.startLat = start.latitude;
+        this.startLng = start.longitude;
     }
 
-    public LatLng getEnd() {
-        return end;
+    public LatLng getStart() {
+        return new LatLng(startLat, startLng);
     }
 
     public void setEnd(LatLng end) {
-        this.end = end;
+        this.endLat = end.latitude;
+        this.endLng = end.longitude;
+    }
+
+    public LatLng getEnd() {
+        return new LatLng(endLat, endLng);
+    }
+
+    public void setEndLng(double endLng) {
+        this.endLng = endLng;
     }
 
     public String getJson() {
@@ -64,6 +102,6 @@ public class Route extends SugarRecord<Route> implements Serializable {
     }
 
     public LatLng getMidpoint() {
-        return new LatLng(start.latitude/2 + end.latitude/2, start.longitude/2 + end.longitude/2);
+        return new LatLng(startLat/2 + endLat/2, startLng/2 + endLng/2);
     }
 }

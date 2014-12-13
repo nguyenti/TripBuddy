@@ -16,6 +16,9 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.ImageButton;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import org.json.JSONObject;
@@ -77,6 +80,17 @@ public class AddressActivity extends Activity implements AdapterView.OnItemClick
                 finish();
             }
         });
+
+        RadioButton ibCar = (RadioButton) findViewById(R.id.btnCar);
+        RadioButton ibWalk = (RadioButton) findViewById(R.id.btnWalk);
+        RadioButton ibBike = (RadioButton) findViewById(R.id.btnBike);
+        RadioButton ibTransit = (RadioButton) findViewById(R.id.btnTransit);
+
+//        ImageButton ibCar = (ImageButton) findViewById(R.id.btnCar);
+//        ImageButton ibWalk = (ImageButton) findViewById(R.id.btnWalk);
+//        ImageButton ibBike = (ImageButton) findViewById(R.id.btnBike);
+//        ImageButton ibTransit = (ImageButton) findViewById(R.id.btnTransit);
+
 
 //        // start async here
 //        try {

@@ -6,6 +6,99 @@
     android:layout_height="match_parent"
     android:layout_margin="10dp">
 
+    <!--<RelativeLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
+        <!--<ImageButton-->
+            <!--android:id="@+id/btnCar"-->
+            <!--android:background="@drawable/ic_car"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"/>-->
+        <!--<ImageButton-->
+            <!--android:id="@+id/btnWalk"-->
+            <!--android:background="@drawable/ic_walk"-->
+            <!--android:layout_toRightOf="@id/btnCar"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content" />-->
+        <!--<ImageButton-->
+            <!--android:id="@+id/btnBike"-->
+            <!--android:background="@drawable/ic_cycling"-->
+            <!--android:layout_toRightOf="@id/btnWalk"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content" />-->
+        <!--<ImageButton-->
+            <!--android:id="@+id/btnTransit"-->
+            <!--android:background="@drawable/ic_public"-->
+            <!--android:layout_toRightOf="@id/btnBike"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content" />-->
+
+        <!--</RelativeLayout>-->
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <RadioButton
+            android:id="@+id/btnCar"
+            android:drawableRight="@drawable/ic_car"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <RadioButton
+            android:id="@+id/btnWalk"
+            android:drawableRight="@drawable/ic_walk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:id="@+id/btnBike"
+            android:drawableRight="@drawable/ic_cycling"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <RadioButton
+            android:id="@+id/btnTransit"
+            android:drawableRight="@drawable/ic_public"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </RadioGroup>
+
+    <!--<RadioGroup-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
+        <!--<RadioButton-->
+            <!--android:id="@+id/rbCar"-->
+            <!--android:drawableLeft="@drawable/ic_car"-->
+            <!--android:text="Car"-->
+            <!--android:checked="true"-->
+            <!--android:layout_width="150dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight=".5"/>-->
+        <!--<RadioButton-->
+            <!--android:id="@+id/rbWalk"-->
+            <!--android:drawableLeft="@drawable/ic_walk"-->
+            <!--android:text="Walk"-->
+            <!--android:layout_toRightOf="@id/rbCar"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight=".5"/>-->
+        <!--<RadioButton-->
+            <!--android:id="@+id/rbBike"-->
+            <!--android:drawableLeft="@drawable/ic_cycling"-->
+            <!--android:text="Bike"-->
+            <!--android:layout_below="@id/rbCar"-->
+            <!--android:layout_width="150dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"/>-->
+        <!--<RadioButton-->
+            <!--android:id="@+id/rbTransport"-->
+            <!--android:drawableLeft="@drawable/ic_public"-->
+            <!--android:text="Public Transportation"-->
+            <!--android:layout_toRightOf="@id/rbBike"-->
+            <!--android:layout_below="@id/rbWalk"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1"/>-->
+    <!--</RadioGroup>-->
+
     <TextView
         android:id="@+id/from_label"
         android:layout_width="match_parent"

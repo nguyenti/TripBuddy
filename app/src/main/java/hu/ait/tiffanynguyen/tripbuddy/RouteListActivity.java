@@ -28,6 +28,7 @@ public class RouteListActivity extends ListActivity {
 
         try {
             List<Route> routeList = Route.listAll(Route.class);
+            Log.i("LOG_ROUTELIST", routeList.toString());
             setListAdapter(new RouteAdapter(getApplicationContext(),routeList));
         } catch (Exception e) {
             Log.e("LOG_LISTALL", "Cannot find db");
