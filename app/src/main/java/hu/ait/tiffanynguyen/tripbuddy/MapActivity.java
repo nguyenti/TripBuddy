@@ -31,10 +31,7 @@ import java.util.List;
 import hu.ait.tiffanynguyen.tripbuddy.data.Route;
 import hu.ait.tiffanynguyen.tripbuddy.map.GeoCodeRequest;
 import hu.ait.tiffanynguyen.tripbuddy.map.HttpConnection;
-//import hu.ait.tiffanynguyen.tripbuddy.map.ParserTask;
 import hu.ait.tiffanynguyen.tripbuddy.map.PathJSONParser;
-import hu.ait.tiffanynguyen.tripbuddy.map.ReverseGeoCodeRequest;
-//import hu.ait.tiffanynguyen.tripbuddy.map.ReadTask;
 
 /**
  * Directions code taken from http://javapapers.com/android/draw-path-on-google-maps-android-api/
@@ -165,10 +162,12 @@ public class MapActivity extends Activity {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            Log.i("LOG_SENDING", "Sending json..");
-            Intent i = new Intent(FILTER_JSON);
-            i.putExtra(KEY_JSON, result);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+            Log.i("LOG_JSON", result);
+            currDir.setJson(result);
+//            Log.i("LOG_SENDING", "Sending json..");
+//            Intent i = new Intent(FILTER_JSON);
+//            i.putExtra(KEY_JSON, result);
+//            LocalBroadcastManager.getInstance(context).sendBroadcast(i);
             new ParserTask(context).execute(result);
         }
     }
@@ -277,9 +276,11 @@ public class MapActivity extends Activity {
             Bundle bundle = data.getBundleExtra(AddressActivity.LOCATION_BUNDLE);
             String start = bundle.getString(AddressActivity.START_LOCATION);
             String end = bundle.getString(AddressActivity.END_LOCATION);
+            currDir.setStrStart(start);
+            currDir.setStrEnd(end);
 
             GeoCodeRequest geoCodeRequest = new GeoCodeRequest(this);
-            geoCodeRequest.execute(start, end);
+            geoCodeRequest.execute(start.replaceAll("\\s+","+"), end.replaceAll("\\s+","+"));
 
         } else if (resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
@@ -296,26 +297,8 @@ public class MapActivity extends Activity {
                 LatLng[] latLng = (LatLng[]) bundle.getParcelableArray(GeoCodeRequest.KEY_BUNDLE);
 
                 updateMap(latLng);
+                Log.i("LOG_CURRDIR", currDir.toString());
             }
-            if (intent.hasExtra(ReadTask.KEY_JSON)) {
-                Log.i("LOG_RECEIVED", "got json");
-
-                String json = intent.getStringExtra(ReadTask.KEY_JSON);
-                currDir.setJson(json);
-            }
-            if (intent.hasExtra(ReverseGeoCodeRequest.KEY_STR_ADDRESS)) {
-                Log.i("LOG_RECEIVED", "got street addr");
-
-                String results[] = intent.getStringArrayExtra(ReverseGeoCodeRequest.KEY_STR_ADDRESS);
-                currDir.setStrStart(results[0]);
-                currDir.setStrEnd(results[1]);
-            }
-//            if (intent.hasExtra(ParserTask.KEY_POLYLINE)) {
-//                Log.i("LOG_RECEIVED", "got polyline");
-//                Bundle bundle = intent.getBundleExtra(ParserTask.KEY_POLYLINE);
-//                PolylineOptions polyLineOptions = bundle.getParcelable(ParserTask.KEY_POLY_BUNDLE);
-//                map.addPolyline(polyLineOptions);
-//            }
         }
     };
 
@@ -325,9 +308,6 @@ public class MapActivity extends Activity {
 
         currDir.setStart(latLng[0]);
         currDir.setEnd(latLng[1]);
-
-        ReverseGeoCodeRequest gReq = new ReverseGeoCodeRequest(this);
-        gReq.execute(currDir.getStart(), currDir.getEnd());
 
         ReadTask downloadTask = new ReadTask(this);
         String url = getMapsApiDirectionsUrl(latLng[0], latLng[1]);

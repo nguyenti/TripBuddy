@@ -104,4 +104,9 @@ public class Route extends SugarRecord<Route> implements Serializable {
     public LatLng getMidpoint() {
         return new LatLng(startLat/2 + endLat/2, startLng/2 + endLng/2);
     }
+
+    public String toString() {
+        return "\n Start: " + startLat + "," + startLng + " - " + strStart + "\n"
+                + "End: " + endLat + "," + endLng + " - " + strEnd + "\n";
+    }
 }

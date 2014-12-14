@@ -142,11 +142,6 @@ class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterab
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "Cannot process JSON results", e);
             }
-
-
-//        Intent i = new Intent(FILTER_LOCATIONS);
-//        i.putExtra(KEY_LOCATION, resultList);
-//        LocalBroadcastManager.getInstance(context).sendBroadcast(i);
         }
 
     }

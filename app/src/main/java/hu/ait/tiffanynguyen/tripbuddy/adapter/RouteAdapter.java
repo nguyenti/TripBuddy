@@ -1,6 +1,7 @@
 package hu.ait.tiffanynguyen.tripbuddy.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +12,6 @@ import java.util.List;
 
 import hu.ait.tiffanynguyen.tripbuddy.R;
 import hu.ait.tiffanynguyen.tripbuddy.data.Route;
-import hu.ait.tiffanynguyen.tripbuddy.map.ReverseGeoCodeRequest;
 
 /**
  * Created by tiffanynguyen on 12/10/14.
@@ -73,8 +73,9 @@ public class RouteAdapter extends BaseAdapter {
 
         if (c != null) {
             ViewHolder holder = (ViewHolder) v.getTag();
-            holder.tvFrom.setText(c.getStrStart());
-            holder.tvTo.setText(c.getStrEnd());
+            Log.i("LOG_STRSTART", c.getStrEnd()+"");
+            holder.tvFrom.setText("From: " + c.getStrStart());
+            holder.tvTo.setText("To: " + c.getStrEnd());
         }
 
         return v;

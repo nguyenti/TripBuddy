@@ -49,16 +49,6 @@ public class AddressActivity extends Activity implements AdapterView.OnItemClick
         actvFrom = (AutoCompleteTextView) findViewById(R.id.actvFrom);
         actvTo = (AutoCompleteTextView) findViewById(R.id.actvTo);
 
-//        actvFrom.setText("Fisherman's Wharf, San Francisco, CA, United States");
-//        actvTo.setText("The Moscone Center, Howard Street, San Francisco, CA, United States");
-
-//        actvFrom.setAdapter(new PlacesAutoCompleteAdapter(this,
-//                android.R.layout.simple_dropdown_item_1line));
-//        actvTo.setAdapter(new PlacesAutoCompleteAdapter(this,
-//                android.R.layout.simple_dropdown_item_1line));
-
-
-
         actvFrom.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
         actvFrom.setOnItemClickListener(this);
 
@@ -73,8 +63,8 @@ public class AddressActivity extends Activity implements AdapterView.OnItemClick
             public void onClick(View v) {
                 Intent intentResult = new Intent();
                 Bundle arguments = new Bundle();
-                arguments.putString(START_LOCATION, actvFrom.getText().toString().trim().replaceAll("\\s+","+"));
-                arguments.putString(END_LOCATION, actvTo.getText().toString().trim().replaceAll("\\s+","+"));
+                arguments.putString(START_LOCATION, actvFrom.getText().toString().trim());
+                arguments.putString(END_LOCATION, actvTo.getText().toString().trim());
                 intentResult.putExtra(LOCATION_BUNDLE, arguments);
                 setResult(RESULT_OK, intentResult);
                 finish();
