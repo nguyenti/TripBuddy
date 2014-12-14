@@ -48,7 +48,7 @@ public class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements F
                 if (constraint != null) {
                     // Retrieve the autocomplete results.
                     new AutoComplete().execute(constraint.toString());
-                    Log.i("LOG_CONSTRAINT", constraint.toString());
+//                    Log.i("LOG_CONSTRAINT", constraint.toString());
                     // Assign the data to the FilterResults
                     filterResults.values = resultList;
                     filterResults.count = resultList.size();
@@ -102,10 +102,10 @@ public class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements F
                 }
                 resultList = jsonResults.toString();
             } catch (MalformedURLException e) {
-                Log.e(LOG_TAG, "Error processing Places API URL", e);
+//                Log.e(LOG_TAG, "Error processing Places API URL", e);
                 return resultList;
             } catch (IOException e) {
-                Log.e(LOG_TAG, "Error connecting to Places API", e);
+//                Log.e(LOG_TAG, "Error connecting to Places API", e);
                 return resultList;
             } finally {
                 if (conn != null) {
@@ -130,7 +130,7 @@ public class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements F
                 }
                 notifyDataSetChanged();
             } catch (JSONException e) {
-                Log.e(LOG_TAG, "Cannot process JSON results", e);
+//                Log.e(LOG_TAG, "Cannot process JSON results", e);
             }
         }
 

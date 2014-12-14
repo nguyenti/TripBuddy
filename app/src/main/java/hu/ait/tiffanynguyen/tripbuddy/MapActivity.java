@@ -11,8 +11,8 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
-import android.os.Bundle;
+import android.os.*;
+import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
 import android.text.InputType;
@@ -78,23 +78,22 @@ public class MapActivity extends Activity {
 
         final SharedPreferences sp =
                 getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        if (sp.getBoolean("my_first_time", true)) {
+        if (sp.getBoolean(getString(R.string.my_first_time), true)) {
             if (!isConnected) {
                 new AlertDialog.Builder(MapActivity.this)
-                        .setTitle("Network Connectivity")
-                        .setMessage("The first time you open TripBuddy, you need internet connection." +
-                                " Please try again with connection")
-                        .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                        .setTitle(getString(R.string.network_connectivity))
+                        .setMessage(getString(R.string.open_with_network))
+                        .setNeutralButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
 //                                MapActivity.this.finish();
-                                  android.os.Process.killProcess(android.os.Process.myPid());
+                                  Process.killProcess(Process.myPid());
                                   System.exit(0);
                             }
                         })
                         .show();
             } else {
-                sp.edit().putBoolean("my_first_time", false).commit();
+                sp.edit().putBoolean(getString(R.string.my_first_time), false).apply();
             }
         }
 
@@ -142,7 +141,7 @@ public class MapActivity extends Activity {
     private void addNewMarkers(LatLng[] latLng) {
         map.clear();
         for (int i = 0; i < latLng.length; i++) {
-            Log.i("LOG_MARKER", "Added marker at " + latLng[i].toString());
+//            Log.i("LOG_MARKER", "Added marker at " + latLng[i].toString());
             map.addMarker(new MarkerOptions().position(latLng[i]).title("Item " + i));
         }
    }
@@ -156,7 +155,7 @@ public class MapActivity extends Activity {
                 HttpConnection http = new HttpConnection();
                 data = http.readUrl(url[0]);
             } catch (Exception e) {
-                Log.d("Background Task", e.toString());
+//                Log.d("Background Task", e.toString());
             }
             return data;
         }
@@ -216,7 +215,7 @@ public class MapActivity extends Activity {
                 map.addPolyline(polyLineOptions);
             } else {
                 Toast.makeText(getApplicationContext(),
-                        "Sorry, no results were found", Toast.LENGTH_SHORT).show();
+                        getString(R.string.no_results_found), Toast.LENGTH_SHORT).show();
                 currDir = null;
             }
         }
@@ -239,19 +238,19 @@ public class MapActivity extends Activity {
         if (id == R.id.action_save) {
             try {
                 if (currDir == null) {
-                    Toast.makeText(this, "Please look up a route!",
+                    Toast.makeText(this, getString(R.string.look_up_route),
                             Toast.LENGTH_SHORT).show();
                 } else if (Route.findById(Route.class, currDir.getId()) == null) {
                     currDir.save();
-                    Toast.makeText(this, "Saved!",
+                    Toast.makeText(this, getString(R.string.saved),
                             Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(this, "You've already saved this route",
+                    Toast.makeText(this, getString(R.string.already_saved),
                             Toast.LENGTH_SHORT).show();
                 }
 
             } catch (Exception e) {
-                Toast.makeText(this, "Sorry, there was an issue saving. Please try again later",
+                Toast.makeText(this, getString(R.string.issue_saving),
                         Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
@@ -268,7 +267,7 @@ public class MapActivity extends Activity {
                 // REQUEST... is a request code to get results from a certain activity
                 startActivityForResult(i, REQUEST_ROUTE);
             } else {
-                Toast.makeText(this, "Sorry, you cannot look up a new route offline",
+                Toast.makeText(this, getString(R.string.lookup_offline),
                         Toast.LENGTH_SHORT).show();
             }
             return true;
@@ -311,12 +310,12 @@ public class MapActivity extends Activity {
                     currDir = Route.findById(Route.class, currId);
                     updateMapOffline(currDir.getStartEnd());
                 } else {
-                    Toast.makeText(this, "Sorry, there was an issue getting your saved route",
+                    Toast.makeText(this, getString(R.string.issue_saved_route),
                             Toast.LENGTH_SHORT).show();
                 }
             }
         } else if (resultCode == RESULT_CANCELED) {
-            Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, getString(R.string.cancelled), Toast.LENGTH_LONG).show();
         }
     }
 

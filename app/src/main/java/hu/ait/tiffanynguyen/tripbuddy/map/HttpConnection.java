@@ -18,7 +18,6 @@ public class HttpConnection {
         InputStream iStream = null;
         HttpURLConnection urlConnection = null;
         try {
-            Log.i("LOG_URL", mapsApiDirectionsUrl);
             URL url = new URL(mapsApiDirectionsUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.connect();
@@ -33,7 +32,7 @@ public class HttpConnection {
             data = sb.toString();
             br.close();
         } catch (Exception e) {
-            Log.d("Exception while reading url", e.toString());
+//            Log.d("Exception while reading url", e.toString());
         } finally {
             iStream.close();
             urlConnection.disconnect();

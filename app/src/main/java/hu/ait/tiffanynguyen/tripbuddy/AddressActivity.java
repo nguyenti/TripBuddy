@@ -49,7 +49,7 @@ public class AddressActivity extends Activity implements AdapterView.OnItemClick
             @Override
             public void onClick(View v) {
                 if (actvFrom.getText().length() <= 0 || actvTo.getText().length() <= 0) {
-                    Toast.makeText(getApplicationContext(), "Please make sure that all fields are filled out",
+                    Toast.makeText(getApplicationContext(), getString(R.string.filled_out_fields),
                             Toast.LENGTH_SHORT).show();
                 } else {
                     RadioGroup radioGroup = (RadioGroup) findViewById(R.id.rgTransport);
@@ -69,19 +69,5 @@ public class AddressActivity extends Activity implements AdapterView.OnItemClick
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
         String str = (String) adapterView.getItemAtPosition(position);
         Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-//        LocalBroadcastManager.getInstance(this).registerReceiver(
-//                locationReceiver, new IntentFilter(PlacesAutoCompleteAdapter.AutoComplete.FILTER_LOCATIONS)
-//        );
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-//        LocalBroadcastManager.getInstance(this).unregisterReceiver(locationReceiver);
     }
 }

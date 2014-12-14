@@ -14,5 +14,26 @@
     <string name="btn_view">View</string>
     <string name="btn_delete">Delete</string>
     <string name="icon_message_travel_type">Travel type</string>
+    <string name="geo_api_key">AIzaSyCMhs1dkvIdMMt1R0kyp4ekYBgOzr4o1uc</string>
+    <string name="try_again_bad_input">Sorry, either something went wrong on our end or Google couldn\'t find one of your inputs. Please try again</string>
+    <string name="issue_saved_routes">Sorry, there was an issue getting your saved routes. Please try again later</string>
+    <string name="delete">Delete?</string>
+    <string name="confirm_delete">Are you sure you want to delete this route?</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="filled_out_fields">Please make sure that all fields are filled out</string>
+    <string name="my_first_time">my_first_time</string>
+    <string name="network_connectivity">Network Connectivity</string>
+    <string name="open_with_network">The first time you open TripBuddy, you need internet connection. Please try again with connection</string>
+    <string name="no_results_found">Sorry, no results were found</string>
+    <string name="look_up_route">Please look up a route!</string>
+    <string name="saved">Saved!</string>
+    <string name="already_saved">You\'ve already saved this route</string>
+    <string name="issue_saving">Sorry, there was an issue saving. Please try again later</string>
+    <string name="lookup_offline">Sorry, you cannot look up a new route offline</string>
+    <string name="issue_saved_route">Sorry, there was an issue getting your saved route</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="label_to">To: </string>
+    <string name="label_from">From: </string>
 
 </resources>

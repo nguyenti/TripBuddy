@@ -25,6 +25,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import hu.ait.tiffanynguyen.tripbuddy.R;
+
 /**
  * Created by tiffanynguyen on 11/27/14.
  */
@@ -50,7 +52,7 @@ public class GeoCodeRequest extends AsyncTask<String, Void, LatLng[]> {
             if (params.length != 2)
                 throw new Exception();
 
-            GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyCMhs1dkvIdMMt1R0kyp4ekYBgOzr4o1uc");
+            GeoApiContext context = new GeoApiContext().setApiKey(this.context.getString(R.string.geo_api_key));
             GeocodingResult[] resultsStart =  GeocodingApi.geocode(context,
                     params[0]).await();
             com.google.maps.model.LatLng ll = resultsStart[0].geometry.location;
@@ -64,7 +66,6 @@ public class GeoCodeRequest extends AsyncTask<String, Void, LatLng[]> {
             result[1] = latLngEnd;
             failed = false;
         } catch (Exception e) {
-            Log.i("LOG_GEOCODING", "FAILED");
             e.getMessage();
             failed = true;
         }
@@ -75,8 +76,7 @@ public class GeoCodeRequest extends AsyncTask<String, Void, LatLng[]> {
     @Override
     protected void onPostExecute(LatLng[] latLng) {
         if (failed)
-            Toast.makeText(context, "Sorry, either something went wrong on our end or" +
-                    " Google couldn't find one of your inputs. Please try again",
+            Toast.makeText(context, context.getString(R.string.try_again_bad_input),
                     Toast.LENGTH_SHORT).show();
         else {
             Intent i = new Intent(FILTER_ADDRESS);

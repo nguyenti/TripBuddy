@@ -77,8 +77,8 @@ public class RouteAdapter extends BaseAdapter {
 
         if (c != null) {
             ViewHolder holder = (ViewHolder) v.getTag();
-            holder.tvFrom.setText("From: " + c.getStrStart());
-            holder.tvTo.setText("To: " + c.getStrEnd());
+            holder.tvFrom.setText(context.getString(R.string.label_from) + c.getStrStart());
+            holder.tvTo.setText(context.getString(R.string.label_to) + c.getStrEnd());
             switch (c.getTravelMode()) {
                 case R.drawable.ic_cycling:
                     holder.ivType.setImageResource(R.drawable.ic_cycling);

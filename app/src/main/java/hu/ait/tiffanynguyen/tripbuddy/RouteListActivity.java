@@ -26,9 +26,7 @@ import hu.ait.tiffanynguyen.tripbuddy.data.Route;
 
 public class RouteListActivity extends ListActivity {
 
-    public static final String ARG_ITEM_ID = "item_id";
     public static final String SAVED_ROUTE = "SAVED_ROUTE";
-    public static final String ROUTE_ID = "ROUTE_ID";
 
     List<Route> routeList;
 
@@ -40,7 +38,7 @@ public class RouteListActivity extends ListActivity {
         try {
             refreshList();
         } catch (Exception e) {
-            Toast.makeText(this, "Sorry, there was an issue getting your saved routes. Please try again later",
+            Toast.makeText(this, getString(R.string.issue_saved_routes),
                     Toast.LENGTH_SHORT).show();
             e.printStackTrace();
             fail = true;
@@ -69,16 +67,16 @@ public class RouteListActivity extends ListActivity {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
                 new AlertDialog.Builder(RouteListActivity.this)
-                        .setTitle("Delete?")
-                        .setMessage("Are you sure you want to delete this route?")
-                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        .setTitle(getString(R.string.delete))
+                        .setMessage(getString(R.string.confirm_delete))
+                        .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 Route.findById(Route.class,
                                         ((Route) getListAdapter().getItem(position)).getId()).delete();
                                 refreshList();
                             }
                         })
-                        .setNegativeButton("Cancel", null)
+                        .setNegativeButton(getString(R.string.cancel), null)
                         .show();
                 return true;
             }
