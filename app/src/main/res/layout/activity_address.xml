@@ -36,28 +36,33 @@
         <!--</RelativeLayout>-->
 
     <RadioGroup
+        android:id="@+id/rgTransport"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <RadioButton
             android:id="@+id/btnCar"
             android:drawableRight="@drawable/ic_car"
+            android:drawableEnd="@drawable/ic_car"
             android:checked="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
         <RadioButton
             android:id="@+id/btnWalk"
             android:drawableRight="@drawable/ic_walk"
+            android:drawableEnd="@drawable/ic_walk"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <RadioButton
             android:id="@+id/btnBike"
             android:drawableRight="@drawable/ic_cycling"
+            android:drawableEnd="@drawable/ic_cycling"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <RadioButton
             android:id="@+id/btnTransit"
             android:drawableRight="@drawable/ic_public"
+            android:drawableEnd="@drawable/ic_public"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </RadioGroup>

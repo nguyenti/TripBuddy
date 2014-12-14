@@ -11,6 +11,8 @@ import java.io.InputStream;
 
 /**
  * Created by tiffanynguyen on 12/14/14.
+ * Code from:
+ *  https://stackoverflow.com/questions/14784841/tileprovider-using-local-tiles
  */
 public class CustomMapTileProvider implements TileProvider {
     private static final int TILE_WIDTH = 256;

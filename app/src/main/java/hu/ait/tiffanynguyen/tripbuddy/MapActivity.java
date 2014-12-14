@@ -28,6 +28,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.TileOverlayOptions;
@@ -57,9 +59,9 @@ public class MapActivity extends Activity {
     private static final int REQUEST_SAVED_ROUTE = 110;
     private static final String PREF_NAME = "MyMaps";
 
-
     private GoogleMap map;
     private Route currDir;
+    private boolean isConnected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,30 +70,20 @@ public class MapActivity extends Activity {
 
         map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
 
-//        map.setTrafficEnabled(true);
-
-        // if you want to know where the marker was moved to, you need OnMarkerDragListener
-//        map.setOnMarkerDragListener(this);
-//        implements GoogleMap.OnMarkerDragListener
-
-//        String url = getMapsApiDirectionsUrl();
-//        ReadTask downloadTask = new ReadTask(this);
-//        downloadTask.execute(url);
         ConnectivityManager cm =
                 (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
 
         final SharedPreferences sp =
                 getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         if (sp.getBoolean("my_first_time", true)) {
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-            boolean isConnected = activeNetwork != null &&
-                    activeNetwork.isConnectedOrConnecting();
             if (!isConnected) {
                 new AlertDialog.Builder(MapActivity.this)
                         .setTitle("Network Connectivity")
                         .setMessage("The first time you open TripBuddy, you need internet connection." +
-                                " Please try again later")
+                                " Please try again with connection")
                         .setNeutralButton("OK", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -106,16 +98,7 @@ public class MapActivity extends Activity {
             }
         }
 
-//        currDir = new Route(PIPA_UTCA, AIT);
         map.addTileOverlay(new TileOverlayOptions().tileProvider(new CustomMapTileProvider(getResources().getAssets())));
-        // You can change the CameraPosition to view the map differently
-        // This will have a 3d movement Zooming into the position (animate Camera)
-//        CameraPosition cameraPosition = new CameraPosition.Builder()
-//                .target(currDir.getMidpoint())
-//                .zoom(12)
-//                .build();
-//        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-//        addMarkers();
     }
 
     @Override
@@ -132,40 +115,33 @@ public class MapActivity extends Activity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(locationReceiver);
     }
 
-//    private String getMapsApiDirectionsUrl() {
-//        String waypoints = "waypoints=optimize:true|"
-//                + PIPA_UTCA.latitude + "," + PIPA_UTCA.longitude
-//                + "||" + AIT.latitude + "," + AIT.longitude;
-//
-//        String sensor = "sensor=false";
-//        String params = waypoints + "&" + sensor;
-//        String output = "json";
-//        String url = "https://maps.googleapis.com/maps/api/directions/"
-//                + output + "?" + params;
-//        Log.i("LOG_URL", url);
-//        return url;
-//    }
-
-    private String getMapsApiDirectionsUrl(LatLng start, LatLng end) {
+    private String getMapsApiDirectionsUrl(LatLng start, LatLng end, int travelMode) {
         String waypoints = "waypoints=optimize:true|"
                 + start.latitude + "," + start.longitude
                 + "||" + end.latitude + "," + end.longitude;
 
+        String mode;
+        switch (travelMode) {
+            case R.id.btnWalk:
+                mode = "mode=walking";
+                break;
+            case R.id.btnBike:
+                mode = "mode=bicycling";
+                break;
+            case R.id.btnTransit:
+                mode = "mode=transit";
+                break;
+            default:
+                mode = "mode=driving";
+        }
+
+        Toast.makeText(this,mode,Toast.LENGTH_SHORT);
         String sensor = "sensor=false";
-        String params = waypoints + "&" + sensor;
+        String params = waypoints + "&" + sensor + "&" + mode;
         String output = "json";
         return "https://maps.googleapis.com/maps/api/directions/"
                 + output + "?" + params;
     }
-
-//    private void addMarkers() {
-//        if (map != null) {
-//            map.addMarker(new MarkerOptions().position(PIPA_UTCA)
-//                    .title("Pipa Point"));
-//            map.addMarker(new MarkerOptions().position(AIT)
-//                    .title("AIT Point"));
-//        }
-//    }
 
     private void addNewMarkers(LatLng[] latLng) {
         map.clear();
@@ -176,14 +152,6 @@ public class MapActivity extends Activity {
    }
 
     public class ReadTask extends AsyncTask<String, Void, String> {
-
-        public static final String FILTER_JSON = "FILTER_JSON";
-        public static final String KEY_JSON = "KEY_JSON";
-        private Context context;
-
-        ReadTask(Context context) {
-            this.context = context;
-        }
 
         @Override
         protected String doInBackground(String... url) {
@@ -202,18 +170,12 @@ public class MapActivity extends Activity {
             super.onPostExecute(result);
             Log.i("LOG_JSON", result);
             currDir.setJson(result);
-            new ParserTask(context).execute(result);
+            new ParserTask().execute(result);
         }
     }
 
     public class ParserTask extends
             AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
-
-        private Context context;
-
-        public ParserTask(Context context) {
-            this.context = context;
-        }
 
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(
@@ -234,32 +196,35 @@ public class MapActivity extends Activity {
 
         @Override
         protected void onPostExecute(List<List<HashMap<String, String>>> routes) {
-            ArrayList<LatLng> points = null;
+            ArrayList<LatLng> points;
             PolylineOptions polyLineOptions = null;
             Log.i("LOG_ROUTESIZE", routes.size() + "");
+            if (routes.size() > 0) {
+                // traversing through routes
+                for (int i = 0; i < routes.size(); i++) {
+                    points = new ArrayList<LatLng>();
+                    polyLineOptions = new PolylineOptions();
+                    List<HashMap<String, String>> path = routes.get(i);
 
-            // traversing through routes
-            for (int i = 0; i < routes.size(); i++) {
-                points = new ArrayList<LatLng>();
-                polyLineOptions = new PolylineOptions();
-                List<HashMap<String, String>> path = routes.get(i);
+                    for (int j = 0; j < path.size(); j++) {
+                        HashMap<String, String> point = path.get(j);
 
-                for (int j = 0; j < path.size(); j++) {
-                    HashMap<String, String> point = path.get(j);
+                        double lat = Double.parseDouble(point.get("lat"));
+                        double lng = Double.parseDouble(point.get("lng"));
+                        LatLng position = new LatLng(lat, lng);
 
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lng = Double.parseDouble(point.get("lng"));
-                    LatLng position = new LatLng(lat, lng);
+                        points.add(position);
+                    }
 
-                    points.add(position);
+                    polyLineOptions.addAll(points);
+                    polyLineOptions.width(4);
+                    polyLineOptions.color(Color.CYAN);
                 }
-
-                polyLineOptions.addAll(points);
-                polyLineOptions.width(4);
-                polyLineOptions.color(Color.CYAN);
+                map.addPolyline(polyLineOptions);
+            } else {
+                Toast.makeText(getApplicationContext(),
+                        "Sorry, no results were found", Toast.LENGTH_SHORT).show();
             }
-
-            map.addPolyline(polyLineOptions);
         }
     }
 
@@ -296,14 +261,19 @@ public class MapActivity extends Activity {
                 Log.e("LOG_SAVE_FAILED", "Save failed");
                 Toast.makeText(this, "Sorry, there was an issue saving. Please try again later",
                         Toast.LENGTH_SHORT).show();
-//                e.printStackTrace();
+                e.printStackTrace();
             }
             return true;
         } else if (id == R.id.action_enter_address) {
-            Intent i = new Intent();
-            i.setClass(this, AddressActivity.class);
-            // REQUEST... is a request code to get results from a certain activity
-            startActivityForResult(i, REQUEST_ROUTE);
+            if (isConnected) {
+                Intent i = new Intent();
+                i.setClass(this, AddressActivity.class);
+                // REQUEST... is a request code to get results from a certain activity
+                startActivityForResult(i, REQUEST_ROUTE);
+            } else {
+                Toast.makeText(this, "Sorry, you cannot look up a new route offline",
+                        Toast.LENGTH_SHORT).show();
+            }
             return true;
         } else if (id == R.id.action_view_routes) {
             Intent i = new Intent();
@@ -317,16 +287,28 @@ public class MapActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (resultCode == RESULT_OK) {
-            Toast.makeText(this, "Directions sent", Toast.LENGTH_LONG).show();
-            Bundle bundle = data.getBundleExtra(AddressActivity.LOCATION_BUNDLE);
-            String start = bundle.getString(AddressActivity.START_LOCATION);
-            String end = bundle.getString(AddressActivity.END_LOCATION);
-            currDir.setStrStart(start);
-            currDir.setStrEnd(end);
+            if (requestCode == REQUEST_ROUTE) {
+                Bundle bundle = data.getBundleExtra(AddressActivity.LOCATION_BUNDLE);
+                String start = bundle.getString(AddressActivity.START_LOCATION);
+                String end = bundle.getString(AddressActivity.END_LOCATION);
+                Log.i("LOG_REQUESTROUTE", "Route requested");
+                currDir = new Route(start, end);
+                currDir.setTravelMode(bundle.getInt(AddressActivity.SELECTED_RADIO));
 
-            GeoCodeRequest geoCodeRequest = new GeoCodeRequest(this);
-            geoCodeRequest.execute(start.replaceAll("\\s+","+"), end.replaceAll("\\s+","+"));
-
+                GeoCodeRequest geoCodeRequest = new GeoCodeRequest(this);
+                geoCodeRequest.execute(start.replaceAll("\\s+", "+"), end.replaceAll("\\s+", "+"));
+            } else if (requestCode == REQUEST_SAVED_ROUTE) {
+//                currDir = (Route) data.getSerializableExtra(RouteListActivity.SAVED_ROUTE);
+                long currId = data.getLongExtra(RouteListActivity.SAVED_ROUTE, -1);
+                Log.i("LOG_ID", currId+"");
+                if (currId != -1) {
+                    currDir = Route.findById(Route.class, currId);
+                    updateMapOffline(currDir.getStartEnd());
+                } else {
+                    Toast.makeText(this, "Sorry, there was an issue getting your saved route",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
         } else if (resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
         }
@@ -354,16 +336,32 @@ public class MapActivity extends Activity {
         currDir.setStart(latLng[0]);
         currDir.setEnd(latLng[1]);
 
-        ReadTask downloadTask = new ReadTask(this);
-        String url = getMapsApiDirectionsUrl(latLng[0], latLng[1]);
+        ReadTask downloadTask = new ReadTask();
+        String url = getMapsApiDirectionsUrl(latLng[0], latLng[1], currDir.getTravelMode());
         downloadTask.execute(url);
 
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(currDir.getMidpoint())
-                .zoom(13)
-//                .bearing(90) // sets how the map is viewed
-                .tilt(30)
-                .build();
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        moveCamera(latLng);
      }
+
+    private void updateMapOffline(LatLng[] latLng) {
+
+        addNewMarkers(latLng);
+
+        ParserTask parserTask = new ParserTask();
+        parserTask.execute(currDir.getJson());
+
+        moveCamera(latLng);
+    }
+
+    private void moveCamera(LatLng[] latlng) {
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (LatLng item : latlng) {
+            builder.include(item);
+        }
+        LatLngBounds bounds = builder.build();
+        int padding = 100; // offset from edges of the map in pixels
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+        map.animateCamera(cu);
+    }
 }

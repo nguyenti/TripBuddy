@@ -5,6 +5,8 @@ import com.orm.SugarRecord;
 
 import java.io.Serializable;
 
+import hu.ait.tiffanynguyen.tripbuddy.R;
+
 /**
  * Created by tiffanynguyen on 12/10/14.
  */
@@ -17,6 +19,7 @@ public class Route extends SugarRecord<Route> implements Serializable {
     double endLng;
     String strEnd;
     String json;
+    int travelMode;
 
     public Route() {}
 
@@ -25,6 +28,11 @@ public class Route extends SugarRecord<Route> implements Serializable {
         this.startLng = start.longitude;
         this.endLat = end.latitude;
         this.endLng = end.longitude;
+    }
+
+    public Route(String strStart, String strEnd) {
+        this.strStart = strStart;
+        this.strEnd = strEnd;
     }
 
     public String getStrStart() {
@@ -85,6 +93,14 @@ public class Route extends SugarRecord<Route> implements Serializable {
         this.endLng = end.longitude;
     }
 
+    public int getTravelMode() {
+        return travelMode;
+    }
+
+    public void setTravelMode(int travelMode) {
+        this.travelMode = travelMode;
+    }
+
     public LatLng getEnd() {
         return new LatLng(endLat, endLng);
     }
@@ -99,6 +115,14 @@ public class Route extends SugarRecord<Route> implements Serializable {
 
     public void setJson(String json) {
         this.json = json;
+    }
+
+    public LatLng[] getStartEnd() {
+        LatLng ll[] = new LatLng[2];
+        ll[0] = new LatLng(startLat, startLng);
+        ll[1] = new LatLng(endLat, endLng);
+
+        return ll;
     }
 
     public LatLng getMidpoint() {

@@ -1,4 +1,4 @@
-package hu.ait.tiffanynguyen.tripbuddy;
+package hu.ait.tiffanynguyen.tripbuddy.adapter;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -22,7 +22,7 @@ import java.util.ArrayList;
 /**
  * Created by tiffanynguyen on 12/4/14.
  */
-class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterable {
+public class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterable {
     private ArrayList<String> resultList = new ArrayList<String>();
 
     public PlacesAutoCompleteAdapter(Context context, int textViewResourceId) {
@@ -48,8 +48,6 @@ class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterab
                 if (constraint != null) {
                     // Retrieve the autocomplete results.
                     new AutoComplete().execute(constraint.toString());
-//                    resultList = new ArrayList<String>();
-//                    resultList.add("Autocomplete Temp");
                     Log.i("LOG_CONSTRAINT", constraint.toString());
                     // Assign the data to the FilterResults
                     filterResults.values = resultList;
@@ -79,10 +77,6 @@ class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterab
         private static final String OUT_JSON = "/json";
 
         private static final String API_KEY = "AIzaSyAMPjOwwYqTflMR1HMmD7WwyJ8HWEj4G2Y";
-        public static final String FILTER_LOCATIONS = "FILTER_LOCATIONS";
-        public static final String KEY_LOCATION = "KEY_LOCATION";
-
-        private Context context;
 
         @Override
         protected String doInBackground(String... params) {
@@ -97,9 +91,7 @@ class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterab
                 sb.append("&input=" + URLEncoder.encode(params[0], "utf8"));
 
                 URL url = new URL(sb.toString());
-                Log.i("LOG_ADDRESS", sb.toString());
                 conn = (HttpURLConnection) url.openConnection();
-                Log.i("LOG_CONN", conn.toString());
                 InputStreamReader in = new InputStreamReader(conn.getInputStream());
 
                 // Load the results into a StringBuilder
@@ -135,9 +127,7 @@ class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterab
                 resultList = new ArrayList<String>(predsJsonArray.length());
                 for (int i = 0; i < predsJsonArray.length(); i++) {
                     resultList.add(predsJsonArray.getJSONObject(i).getString("description"));
-                    Log.i("LOG_AUTCOMPLETE", "In Autocomplete" + i);
                 }
-                Log.i("LOG_AUTCOMPLETE", result.toString());
                 notifyDataSetChanged();
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "Cannot process JSON results", e);
