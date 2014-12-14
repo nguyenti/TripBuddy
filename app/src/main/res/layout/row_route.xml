@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp">
+    android:padding="10dp" >
 
-    <TextView
-        android:id="@+id/tvFrom"
-        android:textSize="20sp"
-        android:textColor="#000"
+    <ImageView
+        android:id="@+id/ivDetailsTravelType"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/icon_message_travel_type" />
 
-    <TextView
-        android:id="@+id/tvTo"
-        android:textSize="20sp"
-        android:textColor="#000"
-        android:layout_marginTop="5dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/llContainer"
+        android:layout_toRightOf="@id/ivDetailsTravelType"
+        android:layout_toEndOf="@id/ivDetailsTravelType"
+        android:orientation="vertical" android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tvFrom"
+            android:textSize="20sp"
+            android:textColor="#000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tvTo"
+            android:textSize="20sp"
+            android:textColor="#000"
+            android:layout_marginTop="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</RelativeLayout>

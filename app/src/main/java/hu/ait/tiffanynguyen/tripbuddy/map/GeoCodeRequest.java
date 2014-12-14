@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.GeoApiContext;
@@ -33,6 +34,7 @@ public class GeoCodeRequest extends AsyncTask<String, Void, LatLng[]> {
     public static final String KEY_ADDRESS = "KEY_ADDRESS";
     public static final String KEY_BUNDLE = "KEY_BUNDLE";
     private Context context;
+    private boolean failed;
 
     // you need a public constructor
     public GeoCodeRequest(Context context) {
@@ -49,12 +51,8 @@ public class GeoCodeRequest extends AsyncTask<String, Void, LatLng[]> {
                 throw new Exception();
 
             GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyCMhs1dkvIdMMt1R0kyp4ekYBgOzr4o1uc");
-//            GeocodingResult[] results =  GeocodingApi.geocode(context,
-//                    "1600 Amphitheatre Parkway Mountain View, CA 94043").await();
             GeocodingResult[] resultsStart =  GeocodingApi.geocode(context,
                     params[0]).await();
-//            Log.i("LOG_GEOCODING", results[0].geometry.location.toString());
-//            System.out.println(results[0].formattedAddress);
             com.google.maps.model.LatLng ll = resultsStart[0].geometry.location;
             latLngStart = new LatLng(ll.lat, ll.lng);
 
@@ -64,9 +62,11 @@ public class GeoCodeRequest extends AsyncTask<String, Void, LatLng[]> {
             latLngEnd = new LatLng(llEnd.lat, llEnd.lng);
             result[0] = latLngStart;
             result[1] = latLngEnd;
+            failed = false;
         } catch (Exception e) {
             Log.i("LOG_GEOCODING", "FAILED");
             e.getMessage();
+            failed = true;
         }
 
         return result;
@@ -74,10 +74,16 @@ public class GeoCodeRequest extends AsyncTask<String, Void, LatLng[]> {
 
     @Override
     protected void onPostExecute(LatLng[] latLng) {
-        Intent i = new Intent(FILTER_ADDRESS);
-        Bundle bundle = new Bundle();
-        bundle.putParcelableArray(KEY_BUNDLE, latLng);
-        i.putExtra(KEY_ADDRESS, bundle);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+        if (failed)
+            Toast.makeText(context, "Sorry, either something went wrong on our end or" +
+                    " Google couldn't find one of your inputs. Please try again",
+                    Toast.LENGTH_SHORT).show();
+        else {
+            Intent i = new Intent(FILTER_ADDRESS);
+            Bundle bundle = new Bundle();
+            bundle.putParcelableArray(KEY_BUNDLE, latLng);
+            i.putExtra(KEY_ADDRESS, bundle);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(i);
+        }
     }
 }

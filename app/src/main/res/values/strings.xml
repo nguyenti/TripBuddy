@@ -11,5 +11,8 @@
     <string name="go">Go</string>
     <string name="label_save">Save current directions</string>
     <string name="title_activity_directions_list">Saved Routes</string>
+    <string name="btn_view">View</string>
+    <string name="btn_delete">Delete</string>
+    <string name="icon_message_travel_type">Travel type</string>
 
 </resources>

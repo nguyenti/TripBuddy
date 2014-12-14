@@ -1,6 +1,10 @@
 package hu.ait.tiffanynguyen.tripbuddy;
 
+import android.app.AlertDialog;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +14,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.orm.query.Condition;
+import com.orm.query.Select;
 
 import java.util.List;
 
@@ -21,16 +28,17 @@ public class RouteListActivity extends ListActivity {
 
     public static final String ARG_ITEM_ID = "item_id";
     public static final String SAVED_ROUTE = "SAVED_ROUTE";
+    public static final String ROUTE_ID = "ROUTE_ID";
+
+    List<Route> routeList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_route_list);
-        List<Route> routeList;
         boolean fail = false;
         try {
-            routeList = Route.listAll(Route.class);
-            setListAdapter(new RouteAdapter(getApplicationContext(), routeList));
+            refreshList();
         } catch (Exception e) {
             Toast.makeText(this, "Sorry, there was an issue getting your saved routes. Please try again later",
                     Toast.LENGTH_SHORT).show();
@@ -54,5 +62,33 @@ public class RouteListActivity extends ListActivity {
                 finish();
             }
         });
+
+
+
+        getListView().setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                new AlertDialog.Builder(RouteListActivity.this)
+                        .setTitle("Delete?")
+                        .setMessage("Are you sure you want to delete this route?")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                Route.findById(Route.class,
+                                        ((Route) getListAdapter().getItem(position)).getId()).delete();
+                                refreshList();
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
+                return true;
+            }
+        });
+
+        refreshList();
+    }
+
+    private void refreshList() {
+        routeList = Route.listAll(Route.class);
+        setListAdapter(new RouteAdapter(getApplicationContext(), routeList));
     }
 }

@@ -1,11 +1,13 @@
 package hu.ait.tiffanynguyen.tripbuddy.adapter;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -53,6 +55,7 @@ public class RouteAdapter extends BaseAdapter {
     public static class ViewHolder {
         TextView tvFrom;
         TextView tvTo;
+        ImageView ivType;
     }
 
     @Override
@@ -66,6 +69,7 @@ public class RouteAdapter extends BaseAdapter {
             ViewHolder holder = new ViewHolder();
             holder.tvFrom = (TextView) v.findViewById(R.id.tvFrom);
             holder.tvTo = (TextView) v.findViewById(R.id.tvTo);
+            holder.ivType = (ImageView) v.findViewById(R.id.ivDetailsTravelType);
             v.setTag(holder);
         }
 
@@ -73,9 +77,18 @@ public class RouteAdapter extends BaseAdapter {
 
         if (c != null) {
             ViewHolder holder = (ViewHolder) v.getTag();
-            Log.i("LOG_STRSTART", c.getStrEnd()+"");
             holder.tvFrom.setText("From: " + c.getStrStart());
             holder.tvTo.setText("To: " + c.getStrEnd());
+            switch (c.getTravelMode()) {
+                case R.drawable.ic_cycling:
+                    holder.ivType.setImageResource(R.drawable.ic_cycling);
+                    break;
+                case R.drawable.ic_walk:
+                    holder.ivType.setImageResource(R.drawable.ic_walk);
+                    break;
+                default:
+                    holder.ivType.setImageResource(R.drawable.ic_car);
+            }
         }
 
         return v;

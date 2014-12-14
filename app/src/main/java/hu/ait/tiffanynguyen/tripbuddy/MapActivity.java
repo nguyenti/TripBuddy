@@ -122,20 +122,16 @@ public class MapActivity extends Activity {
 
         String mode;
         switch (travelMode) {
-            case R.id.btnWalk:
+            case R.drawable.ic_walk:
                 mode = "mode=walking";
                 break;
-            case R.id.btnBike:
+            case R.drawable.ic_cycling:
                 mode = "mode=bicycling";
-                break;
-            case R.id.btnTransit:
-                mode = "mode=transit";
                 break;
             default:
                 mode = "mode=driving";
         }
 
-        Toast.makeText(this,mode,Toast.LENGTH_SHORT);
         String sensor = "sensor=false";
         String params = waypoints + "&" + sensor + "&" + mode;
         String output = "json";
@@ -146,8 +142,8 @@ public class MapActivity extends Activity {
     private void addNewMarkers(LatLng[] latLng) {
         map.clear();
         for (int i = 0; i < latLng.length; i++) {
-            map.addMarker(new MarkerOptions().position(latLng[i]).title("Item " + i));
             Log.i("LOG_MARKER", "Added marker at " + latLng[i].toString());
+            map.addMarker(new MarkerOptions().position(latLng[i]).title("Item " + i));
         }
    }
 
@@ -168,7 +164,6 @@ public class MapActivity extends Activity {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            Log.i("LOG_JSON", result);
             currDir.setJson(result);
             new ParserTask().execute(result);
         }
@@ -198,7 +193,6 @@ public class MapActivity extends Activity {
         protected void onPostExecute(List<List<HashMap<String, String>>> routes) {
             ArrayList<LatLng> points;
             PolylineOptions polyLineOptions = null;
-            Log.i("LOG_ROUTESIZE", routes.size() + "");
             if (routes.size() > 0) {
                 // traversing through routes
                 for (int i = 0; i < routes.size(); i++) {
@@ -208,7 +202,6 @@ public class MapActivity extends Activity {
 
                     for (int j = 0; j < path.size(); j++) {
                         HashMap<String, String> point = path.get(j);
-
                         double lat = Double.parseDouble(point.get("lat"));
                         double lng = Double.parseDouble(point.get("lng"));
                         LatLng position = new LatLng(lat, lng);
@@ -224,6 +217,7 @@ public class MapActivity extends Activity {
             } else {
                 Toast.makeText(getApplicationContext(),
                         "Sorry, no results were found", Toast.LENGTH_SHORT).show();
+                currDir = null;
             }
         }
     }
@@ -243,7 +237,6 @@ public class MapActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_save) {
-            Log.i("LOG_SAVE", "Saved!");
             try {
                 if (currDir == null) {
                     Toast.makeText(this, "Please look up a route!",
@@ -258,13 +251,17 @@ public class MapActivity extends Activity {
                 }
 
             } catch (Exception e) {
-                Log.e("LOG_SAVE_FAILED", "Save failed");
                 Toast.makeText(this, "Sorry, there was an issue saving. Please try again later",
                         Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
             return true;
         } else if (id == R.id.action_enter_address) {
+            ConnectivityManager cm =
+                    (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            isConnected = activeNetwork != null &&
+                    activeNetwork.isConnectedOrConnecting();
             if (isConnected) {
                 Intent i = new Intent();
                 i.setClass(this, AddressActivity.class);
@@ -291,16 +288,25 @@ public class MapActivity extends Activity {
                 Bundle bundle = data.getBundleExtra(AddressActivity.LOCATION_BUNDLE);
                 String start = bundle.getString(AddressActivity.START_LOCATION);
                 String end = bundle.getString(AddressActivity.END_LOCATION);
-                Log.i("LOG_REQUESTROUTE", "Route requested");
                 currDir = new Route(start, end);
-                currDir.setTravelMode(bundle.getInt(AddressActivity.SELECTED_RADIO));
+                int iconId;
+                switch (bundle.getInt(AddressActivity.SELECTED_RADIO)) {
+                    case R.id.btnWalk:
+                        iconId = R.drawable.ic_walk;
+                        break;
+                    case R.id.btnBike:
+                        iconId = R.drawable.ic_cycling;
+                        break;
+                    default:
+                        iconId = R.drawable.ic_car;
+                }
+                currDir.setTravelMode(iconId);
 
                 GeoCodeRequest geoCodeRequest = new GeoCodeRequest(this);
                 geoCodeRequest.execute(start.replaceAll("\\s+", "+"), end.replaceAll("\\s+", "+"));
             } else if (requestCode == REQUEST_SAVED_ROUTE) {
 //                currDir = (Route) data.getSerializableExtra(RouteListActivity.SAVED_ROUTE);
                 long currId = data.getLongExtra(RouteListActivity.SAVED_ROUTE, -1);
-                Log.i("LOG_ID", currId+"");
                 if (currId != -1) {
                     currDir = Route.findById(Route.class, currId);
                     updateMapOffline(currDir.getStartEnd());
@@ -317,14 +323,11 @@ public class MapActivity extends Activity {
     private BroadcastReceiver locationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i("LOG_RECEIVED", "got something");
             if (intent.hasExtra(GeoCodeRequest.KEY_ADDRESS)) {
-                Log.i("LOG_RECEIVED", "got address");
                 Bundle bundle = intent.getBundleExtra(GeoCodeRequest.KEY_ADDRESS);
                 LatLng[] latLng = (LatLng[]) bundle.getParcelableArray(GeoCodeRequest.KEY_BUNDLE);
 
                 updateMap(latLng);
-                Log.i("LOG_CURRDIR", currDir.toString());
             }
         }
     };
@@ -354,13 +357,12 @@ public class MapActivity extends Activity {
     }
 
     private void moveCamera(LatLng[] latlng) {
-
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         for (LatLng item : latlng) {
             builder.include(item);
         }
         LatLngBounds bounds = builder.build();
-        int padding = 100; // offset from edges of the map in pixels
+        int padding = 100;
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
         map.animateCamera(cu);
     }

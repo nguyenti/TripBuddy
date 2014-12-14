@@ -42,20 +42,26 @@ public class AddressActivity extends Activity implements AdapterView.OnItemClick
         actvTo.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
         actvTo.setOnItemClickListener(this);
 
-        final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.rgTransport);
+//        RadioGroup radioGroup = (RadioGroup) findViewById(R.id.rgTransport);
 
         Button btnSubmit = (Button) findViewById(R.id.load_directions);
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intentResult = new Intent();
-                Bundle arguments = new Bundle();
-                arguments.putString(START_LOCATION, actvFrom.getText().toString().trim());
-                arguments.putString(END_LOCATION, actvTo.getText().toString().trim());
-                arguments.putInt(SELECTED_RADIO, radioGroup.getCheckedRadioButtonId());
-                intentResult.putExtra(LOCATION_BUNDLE, arguments);
-                setResult(RESULT_OK, intentResult);
-                finish();
+                if (actvFrom.getText().length() <= 0 || actvTo.getText().length() <= 0) {
+                    Toast.makeText(getApplicationContext(), "Please make sure that all fields are filled out",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    RadioGroup radioGroup = (RadioGroup) findViewById(R.id.rgTransport);
+                    Intent intentResult = new Intent();
+                    Bundle arguments = new Bundle();
+                    arguments.putString(START_LOCATION, actvFrom.getText().toString().trim());
+                    arguments.putString(END_LOCATION, actvTo.getText().toString().trim());
+                    arguments.putInt(SELECTED_RADIO, radioGroup.getCheckedRadioButtonId());
+                    intentResult.putExtra(LOCATION_BUNDLE, arguments);
+                    setResult(RESULT_OK, intentResult);
+                    finish();
+                }
             }
         });
     }
