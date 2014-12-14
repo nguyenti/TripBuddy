@@ -55,7 +55,6 @@ public class AddressActivity extends Activity implements AdapterView.OnItemClick
         actvTo.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
         actvTo.setOnItemClickListener(this);
 
-        Log.i("LOG_FRAGMENT", "Success! Fragment launched!");
 
         Button btnSubmit = (Button) findViewById(R.id.load_directions);
         btnSubmit.setOnClickListener(new View.OnClickListener() {

@@ -7,7 +7,6 @@
 
     <TextView
         android:id="@+id/tvFrom"
-        android:text="From"
         android:textSize="20sp"
         android:textColor="#000"
         android:layout_width="wrap_content"
@@ -16,7 +15,6 @@
     <TextView
         android:id="@+id/tvTo"
         android:textSize="20sp"
-        android:text="To"
         android:textColor="#000"
         android:layout_marginTop="5dp"
         android:layout_width="wrap_content"

@@ -39,24 +39,23 @@ public class ReverseGeoCodeRequest extends AsyncTask<LatLng, Void, String[]> {
             if (params.length != 2)
                 throw new Exception();
 
-            com.google.maps.model.LatLng ll[] = new com.google.maps.model.LatLng[2];
-            ll[0].lat = params[0].latitude;
-            ll[0].lng = params[0].longitude;
-            ll[1].lat = params[1].latitude;
-            ll[1].lat = params[1].longitude;
+            com.google.maps.model.LatLng llStart =
+                    new com.google.maps.model.LatLng(params[0].latitude, params[0].longitude);
+            com.google.maps.model.LatLng llEnd =
+                    new com.google.maps.model.LatLng(params[1].latitude, params[1].longitude);
+
             GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyCMhs1dkvIdMMt1R0kyp4ekYBgOzr4o1uc");
-            GeocodingResult[] resultsStart =  GeocodingApi.reverseGeocode(context, ll[0]).await();
+            GeocodingResult[] resultsStart =  GeocodingApi.reverseGeocode(context, llStart).await();
             start = resultsStart[0].formattedAddress;
 
-            GeocodingResult[] resultsEnd =  GeocodingApi.reverseGeocode(context, ll[1]).await();
+            GeocodingResult[] resultsEnd =  GeocodingApi.reverseGeocode(context, llEnd).await();
             end = resultsEnd[0].formattedAddress;
             result[0] = start;
             result[1] = end;
         } catch (Exception e) {
             Log.i("LOG_REV_GEOCODING", "FAILED");
-            e.getMessage();
+            e.printStackTrace();
         }
-
         return result;
     }
 
@@ -64,6 +63,10 @@ public class ReverseGeoCodeRequest extends AsyncTask<LatLng, Void, String[]> {
     protected void onPostExecute(String[] addrs) {
         Intent i = new Intent(FILTER_STR_ADDRESS);
         i.putExtra(KEY_STR_ADDRESS, addrs);
+//        Bundle bundle = new Bundle();
+//        bundle.putStringArray("BUNDLE_KEY", addrs);
+//        i.putExtra(KEY_STR_ADDRESS, bundle);
+        Log.i("LOG_REV_GEOCODING", "SENDING");
         LocalBroadcastManager.getInstance(context).sendBroadcast(i);
     }
 }

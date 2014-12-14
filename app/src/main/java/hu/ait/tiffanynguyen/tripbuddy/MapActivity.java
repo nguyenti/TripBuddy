@@ -1,19 +1,28 @@
 package hu.ait.tiffanynguyen.tripbuddy;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.Editable;
+import android.text.InputType;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -21,6 +30,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.TileOverlayOptions;
 
 import org.json.JSONObject;
 
@@ -29,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import hu.ait.tiffanynguyen.tripbuddy.data.Route;
+import hu.ait.tiffanynguyen.tripbuddy.map.CustomMapTileProvider;
 import hu.ait.tiffanynguyen.tripbuddy.map.GeoCodeRequest;
 import hu.ait.tiffanynguyen.tripbuddy.map.HttpConnection;
 import hu.ait.tiffanynguyen.tripbuddy.map.PathJSONParser;
@@ -44,6 +55,7 @@ public class MapActivity extends Activity {
 
     private static final int REQUEST_ROUTE = 100;
     private static final int REQUEST_SAVED_ROUTE = 110;
+    private static final String PREF_NAME = "MyMaps";
 
 
     private GoogleMap map;
@@ -62,22 +74,48 @@ public class MapActivity extends Activity {
 //        map.setOnMarkerDragListener(this);
 //        implements GoogleMap.OnMarkerDragListener
 
-        String url = getMapsApiDirectionsUrl();
-        ReadTask downloadTask = new ReadTask(this);
-        downloadTask.execute(url);
+//        String url = getMapsApiDirectionsUrl();
+//        ReadTask downloadTask = new ReadTask(this);
+//        downloadTask.execute(url);
+        ConnectivityManager cm =
+                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        currDir = new Route(PIPA_UTCA, AIT);
 
+        final SharedPreferences sp =
+                getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        if (sp.getBoolean("my_first_time", true)) {
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            boolean isConnected = activeNetwork != null &&
+                    activeNetwork.isConnectedOrConnecting();
+            if (!isConnected) {
+                new AlertDialog.Builder(MapActivity.this)
+                        .setTitle("Network Connectivity")
+                        .setMessage("The first time you open TripBuddy, you need internet connection." +
+                                " Please try again later")
+                        .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+//                                MapActivity.this.finish();
+                                  android.os.Process.killProcess(android.os.Process.myPid());
+                                  System.exit(0);
+                            }
+                        })
+                        .show();
+            } else {
+                sp.edit().putBoolean("my_first_time", false).commit();
+            }
+        }
+
+//        currDir = new Route(PIPA_UTCA, AIT);
+        map.addTileOverlay(new TileOverlayOptions().tileProvider(new CustomMapTileProvider(getResources().getAssets())));
         // You can change the CameraPosition to view the map differently
         // This will have a 3d movement Zooming into the position (animate Camera)
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(currDir.getMidpoint())
-                .zoom(12)
-//                .bearing(90) // sets how the map is viewed
-                .tilt(30)
-                .build();
-        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        addMarkers();
+//        CameraPosition cameraPosition = new CameraPosition.Builder()
+//                .target(currDir.getMidpoint())
+//                .zoom(12)
+//                .build();
+//        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+//        addMarkers();
     }
 
     @Override
@@ -94,19 +132,19 @@ public class MapActivity extends Activity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(locationReceiver);
     }
 
-    private String getMapsApiDirectionsUrl() {
-        String waypoints = "waypoints=optimize:true|"
-                + PIPA_UTCA.latitude + "," + PIPA_UTCA.longitude
-                + "||" + AIT.latitude + "," + AIT.longitude;
-
-        String sensor = "sensor=false";
-        String params = waypoints + "&" + sensor;
-        String output = "json";
-        String url = "https://maps.googleapis.com/maps/api/directions/"
-                + output + "?" + params;
-        Log.i("LOG_URL", url);
-        return url;
-    }
+//    private String getMapsApiDirectionsUrl() {
+//        String waypoints = "waypoints=optimize:true|"
+//                + PIPA_UTCA.latitude + "," + PIPA_UTCA.longitude
+//                + "||" + AIT.latitude + "," + AIT.longitude;
+//
+//        String sensor = "sensor=false";
+//        String params = waypoints + "&" + sensor;
+//        String output = "json";
+//        String url = "https://maps.googleapis.com/maps/api/directions/"
+//                + output + "?" + params;
+//        Log.i("LOG_URL", url);
+//        return url;
+//    }
 
     private String getMapsApiDirectionsUrl(LatLng start, LatLng end) {
         String waypoints = "waypoints=optimize:true|"
@@ -120,14 +158,14 @@ public class MapActivity extends Activity {
                 + output + "?" + params;
     }
 
-    private void addMarkers() {
-        if (map != null) {
-            map.addMarker(new MarkerOptions().position(PIPA_UTCA)
-                    .title("Pipa Point"));
-            map.addMarker(new MarkerOptions().position(AIT)
-                    .title("AIT Point"));
-        }
-    }
+//    private void addMarkers() {
+//        if (map != null) {
+//            map.addMarker(new MarkerOptions().position(PIPA_UTCA)
+//                    .title("Pipa Point"));
+//            map.addMarker(new MarkerOptions().position(AIT)
+//                    .title("AIT Point"));
+//        }
+//    }
 
     private void addNewMarkers(LatLng[] latLng) {
         map.clear();
@@ -164,10 +202,6 @@ public class MapActivity extends Activity {
             super.onPostExecute(result);
             Log.i("LOG_JSON", result);
             currDir.setJson(result);
-//            Log.i("LOG_SENDING", "Sending json..");
-//            Intent i = new Intent(FILTER_JSON);
-//            i.putExtra(KEY_JSON, result);
-//            LocalBroadcastManager.getInstance(context).sendBroadcast(i);
             new ParserTask(context).execute(result);
         }
     }
@@ -246,7 +280,18 @@ public class MapActivity extends Activity {
         if (id == R.id.action_save) {
             Log.i("LOG_SAVE", "Saved!");
             try {
-                currDir.save();
+                if (currDir == null) {
+                    Toast.makeText(this, "Please look up a route!",
+                            Toast.LENGTH_SHORT).show();
+                } else if (Route.findById(Route.class, currDir.getId()) == null) {
+                    currDir.save();
+                    Toast.makeText(this, "Saved!",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "You've already saved this route",
+                            Toast.LENGTH_SHORT).show();
+                }
+
             } catch (Exception e) {
                 Log.e("LOG_SAVE_FAILED", "Save failed");
                 Toast.makeText(this, "Sorry, there was an issue saving. Please try again later",
